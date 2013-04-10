@@ -29,12 +29,20 @@ public class DatasourceSelectionChangeEvent extends GwtEvent<DatasourceSelection
 
   private final DatasourceDto datasourceDto;
 
+  private final Object source;
+
   /**
    * @param datasourceDto
    */
   public DatasourceSelectionChangeEvent(DatasourceDto datasourceDto) {
+    this(null, datasourceDto);
+  }
+
+  public DatasourceSelectionChangeEvent(Object source, DatasourceDto datasourceDto) {
+    this.source = source;
     this.datasourceDto = datasourceDto;
   }
+
 
   public DatasourceDto getSelection() {
     return datasourceDto;
