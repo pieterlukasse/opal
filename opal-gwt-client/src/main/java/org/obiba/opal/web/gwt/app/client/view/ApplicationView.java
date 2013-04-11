@@ -15,20 +15,14 @@ import org.obiba.opal.web.gwt.rest.client.authorization.HasAuthorization;
 import org.obiba.opal.web.gwt.rest.client.authorization.UIObjectAuthorizer;
 
 import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.NavText;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.LayoutPanel;
-import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -56,9 +50,6 @@ public class ApplicationView implements ApplicationPresenter.Display {
 
   @UiField
   NavLink username;
-
-  @UiField
-  Anchor obiba;
 
   @UiField
   Label version;
@@ -91,14 +82,6 @@ public class ApplicationView implements ApplicationPresenter.Display {
 
   public ApplicationView() {
     dock = uiBinder.createAndBindUi(this);
-
-    obiba.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent arg0) {
-        Window.open("http://obiba.org", "_blank", null);
-      }
-    });
   }
 
   @Override

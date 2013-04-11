@@ -24,6 +24,7 @@ import org.obiba.opal.web.gwt.rest.client.authorization.TabAuthorizer;
 import org.obiba.opal.web.model.client.magma.AttributeDto;
 import org.obiba.opal.web.model.client.magma.CategoryDto;
 
+import com.github.gwtbootstrap.client.ui.SimplePager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -31,7 +32,6 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;

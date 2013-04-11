@@ -32,8 +32,6 @@ public class VariableEditableTable extends Table<VariableDto> {
         return item.getName();
       }
     });
-
-    setStyleName(resources.cellTableStyle().cellTableWidget());
     addStyleName("obiba-Table");
     Image loading = new Image("image/loading.gif");
     loading.addStyleName("loading");

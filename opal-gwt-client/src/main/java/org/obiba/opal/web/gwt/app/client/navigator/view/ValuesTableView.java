@@ -30,6 +30,7 @@ import org.obiba.opal.web.model.client.magma.ValueSetsDto;
 import org.obiba.opal.web.model.client.magma.ValueSetsDto.ValueSetDto;
 import org.obiba.opal.web.model.client.magma.VariableDto;
 
+import com.github.gwtbootstrap.client.ui.SimplePager;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
@@ -55,7 +56,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;

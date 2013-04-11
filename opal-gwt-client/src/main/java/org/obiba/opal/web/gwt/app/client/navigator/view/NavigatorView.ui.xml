@@ -14,21 +14,21 @@
     <g:FlowPanel>
       <b:ButtonToolbar addStyleNames="inline">
         <b:ButtonGroup>
-          <b:Button ui:field="createDatasourceButton" size="MINI" icon="PLUS">
+          <b:Button ui:field="createDatasourceButton" size="SMALL" icon="PLUS">
             <ui:msg description="Create Project label">Add Project</ui:msg>
           </b:Button>
-          <b:Button ui:field="importDataButton" size="MINI" icon="SIGNIN">
+          <b:Button ui:field="importDataButton" size="SMALL" icon="SIGNIN">
             <ui:msg description="Data Import label">Import Data</ui:msg>
           </b:Button>
-          <b:Button ui:field="exportDataButton" size="MINI" icon="SIGNOUT">
+          <b:Button ui:field="exportDataButton" size="SMALL" icon="SIGNOUT">
             <ui:msg description="Data Export label">Export Data</ui:msg>
           </b:Button>
         </b:ButtonGroup>
-        <b:Button ui:field="refreshButton" size="MINI" icon="REFRESH">
+        <b:Button ui:field="refreshButton" size="SMALL" icon="REFRESH">
           <ui:msg description="Refresh label">Refresh</ui:msg>
         </b:Button>
       </b:ButtonToolbar>
-      <g:FlowPanel addStyleNames="right-aligned small-search-box">
+      <g:FlowPanel addStyleNames="pull-right small-search-box">
         <g:Grid>
           <g:row>
             <g:customCell styleName="top-aligned">
@@ -41,7 +41,7 @@
         </g:Grid>
       </g:FlowPanel>
     </g:FlowPanel>
-    <g:SimplePanel ui:field="breadcrumb"/>
+    <g:SimplePanel ui:field="breadcrumb" addStyleNames="pull-left"/>
     <g:SimplePanel ui:field="navigatorDisplayPanel"/>
   </g:FlowPanel>
 

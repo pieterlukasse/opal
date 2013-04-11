@@ -9,9 +9,10 @@
  ******************************************************************************/
 package org.obiba.opal.web.gwt.app.client.workbench.view;
 
+import com.github.gwtbootstrap.client.ui.CellTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource.NotStrict;
-import com.google.gwt.user.cellview.client.CellTable;
+
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ProvidesKey;
@@ -23,14 +24,6 @@ public class Table<T> extends CellTable<T> {
 
   public static final int DEFAULT_PAGESIZE = 15;
 
-  protected static final TableResources resources = GWT.create(TableResources.class);
-
-  public interface TableResources extends CellTable.Resources {
-    @Override
-    @NotStrict
-    @Source("org/obiba/opal/web/gwt/app/public/css/opal-CellTable.css")
-    CellTable.Style cellTableStyle();
-  }
 
   public Table() {
     this(DEFAULT_PAGESIZE);
@@ -40,8 +33,7 @@ public class Table<T> extends CellTable<T> {
    * @param pageSize
    */
   public Table(int pageSize) {
-    super(pageSize, resources);
-    setStyleName(resources.cellTableStyle().cellTableWidget());
+    super(pageSize);
     addStyleName("obiba-Table");
     Image loading = new Image("image/loading.gif");
     loading.addStyleName("loading");
@@ -49,8 +41,7 @@ public class Table<T> extends CellTable<T> {
   }
 
   public Table(int pageSize, ProvidesKey<T> keyProvider) {
-    super(pageSize, resources, keyProvider);
-    setStyleName(resources.cellTableStyle().cellTableWidget());
+    super(pageSize, keyProvider);
     addStyleName("obiba-Table");
     Image loading = new Image("image/loading.gif");
     loading.addStyleName("loading");

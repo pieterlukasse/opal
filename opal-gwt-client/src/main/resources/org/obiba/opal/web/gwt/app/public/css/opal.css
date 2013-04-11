@@ -75,8 +75,7 @@ body {
 }
 
 body, table td, select, label, input, textarea {
-  font-family: arial, verdana, sans-serif;
-  font-size: 12px;
+
 }
 
 a, a:visited, a:hover {
@@ -842,6 +841,7 @@ td.row-actions span {
   font-size: 0.9em;
   margin-left: 4em;
   padding-top: 0.2em;
+  background-color: #F5F5F5;
 }
 
 .footbar .gwt-Label {
@@ -856,11 +856,21 @@ td.row-actions span {
 
 /* Content */
 
-.main-content {
+.content {
   border: none;
   margin: 0 auto;
-  width: 1000px;
+  width: 940px;
+}
+
+.main > .content {
   padding-top: 50px;
+}
+
+.main > .footer.content {
+  font-size: 0.8em;
+  border-top: 1px solid #EEEEEE;
+  margin-top: 20px;
+  padding-top: 20px;
 }
 
 /* Workbench */
