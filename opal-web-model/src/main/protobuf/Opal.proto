@@ -239,11 +239,3 @@ message ScheduleDto {
   optional int32 hours = 3;
   optional int32 minutes = 4;
 }
-
-message ProjectDto {
-  required string name = 1;
-  optional string link = 2;
-  optional string datasourceLink = 3;
-  optional string summary = 4;
-  optional string description = 5;
-}

@@ -41,7 +41,7 @@
         </g:Grid>
       </g:FlowPanel>
     </g:FlowPanel>
-    <g:SimplePanel ui:field="breadcrumb" addStyleNames="pull-left"/>
+    <g:SimplePanel ui:field="breadcrumb"/>
     <g:SimplePanel ui:field="navigatorDisplayPanel"/>
   </g:FlowPanel>
 
