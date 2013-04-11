@@ -57,7 +57,7 @@
         </g:FlowPanel>
         <b:FluidRow addStyleNames="footer content">
           <b:Column size="6">
-            <g:Anchor href="http://obiba.org" target="_blank">(c) OBiBa</g:Anchor>
+            <g:Anchor href="http://obiba.org" target="_blank">© 2013 OBiBa</g:Anchor>
           </b:Column>
           <b:Column size="6">
             <g:Label ui:field="version" addStyleNames="pull-right"/>
