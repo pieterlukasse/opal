@@ -27,10 +27,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Objects;
 
-@Component
 /**
  * An implementation of {@link FunctionalUnitService} on top of {@link OpalConfiguration}.
  */
+@Component
 public class DefaultFunctionalUnitService implements FunctionalUnitService {
 
   private final OpalConfigurationService configService;

@@ -22,10 +22,8 @@ import org.obiba.opal.core.runtime.OpalRuntime;
 import org.obiba.opal.shell.CommandRegistry;
 import org.obiba.opal.shell.commands.Command;
 import org.obiba.opal.shell.commands.options.CopyCommandOptions;
-import org.obiba.opal.shell.commands.options.ImportCommandOptions;
 import org.obiba.opal.shell.service.CommandJobService;
 import org.obiba.opal.shell.web.CopyCommandOptionsDtoImpl;
-import org.obiba.opal.shell.web.ImportCommandOptionsDtoImpl;
 import org.obiba.opal.web.model.Commands;
 import org.obiba.opal.web.support.InvalidRequestException;
 import org.slf4j.Logger;
@@ -55,21 +53,21 @@ public class DatasourceCommandsResource extends AbstractCommandsResource {
     this.commandRegistry = commandRegistry;
   }
 
-  @POST
-  @Path("/_import")
-  public Response importData(Commands.ImportCommandOptionsDto options) {
-    if(!name.equals(options.getDestination())) {
-      throw new InvalidRequestException("DataCanOnlyBeImportedInCurrentDatasource", name);
-    }
-
-    // TODO check file access
-
-    ImportCommandOptions importOptions = new ImportCommandOptionsDtoImpl(options);
-    Command<ImportCommandOptions> importCommand = commandRegistry.newCommand("import");
-    importCommand.setOptions(importOptions);
-
-    return launchCommand(importCommand);
-  }
+//  @POST
+//  @Path("/_import")
+//  public Response importData(Commands.ImportCommandOptionsDto options) {
+//    if(!name.equals(options.getDestination())) {
+//      throw new InvalidRequestException("DataCanOnlyBeImportedInCurrentDatasource", name);
+//    }
+//
+//    // TODO check file access
+//
+//    ImportCommandOptions importOptions = new ImportCommandOptionsDtoImpl(options);
+//    Command<ImportCommandOptions> importCommand = commandRegistry.newCommand("import");
+//    importCommand.setOptions(importOptions);
+//
+//    return launchCommand(importCommand);
+//  }
 
   @POST
   @Path("/_copy")

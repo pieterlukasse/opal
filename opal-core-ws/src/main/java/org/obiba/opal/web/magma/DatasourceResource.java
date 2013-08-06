@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -33,12 +34,14 @@ import org.obiba.magma.Datasource;
 import org.obiba.magma.MagmaEngine;
 import org.obiba.magma.ValueTable;
 import org.obiba.magma.ValueTableUpdateListener;
+import org.obiba.magma.audit.UserProvider;
 import org.obiba.magma.support.Disposables;
 import org.obiba.magma.views.View;
 import org.obiba.magma.views.ViewManager;
 import org.obiba.opal.core.cfg.OpalConfiguration;
 import org.obiba.opal.core.cfg.OpalConfigurationService;
 import org.obiba.opal.core.cfg.OpalConfigurationService.ConfigModificationTask;
+import org.obiba.opal.core.domain.batch.ImportConfig;
 import org.obiba.opal.core.runtime.security.support.OpalPermissions;
 import org.obiba.opal.core.service.ImportService;
 import org.obiba.opal.search.IndexManagerConfigurationService;
@@ -47,13 +50,16 @@ import org.obiba.opal.search.StatsIndexManager;
 import org.obiba.opal.search.es.ElasticSearchProvider;
 import org.obiba.opal.search.service.OpalSearchService;
 import org.obiba.opal.web.magma.view.ViewDtos;
+import org.obiba.opal.web.model.Commands;
 import org.obiba.opal.web.model.Magma;
 import org.obiba.opal.web.model.Magma.ViewDto;
 import org.obiba.opal.web.model.Opal;
 import org.obiba.opal.web.model.Opal.AclAction;
 import org.obiba.opal.web.model.Opal.LocaleDto;
 import org.obiba.opal.web.security.AuthorizationInterceptor;
+import org.obiba.opal.web.support.InvalidRequestException;
 import org.obiba.opal.web.ws.security.NoAuthorization;
+import org.springframework.batch.core.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -90,6 +96,8 @@ public class DatasourceResource {
 
   private final Set<ValueTableUpdateListener> tableListeners;
 
+  private final UserProvider userProvider;
+
   @Value("${org.obiba.opal.languages}")
   private String localesProperty;
 
@@ -100,7 +108,7 @@ public class DatasourceResource {
   public DatasourceResource(OpalConfigurationService configService, ImportService importService,
       ViewManager viewManager, OpalSearchService opalSearchService, StatsIndexManager statsIndexManager,
       ElasticSearchProvider esProvider, IndexManagerConfigurationService indexManagerConfigService, ViewDtos viewDtos,
-      Set<ValueTableUpdateListener> tableListeners) {
+      Set<ValueTableUpdateListener> tableListeners, UserProvider userProvider) {
 
     if(configService == null) throw new IllegalArgumentException("configService cannot be null");
     if(viewManager == null) throw new IllegalArgumentException("viewManager cannot be null");
@@ -109,6 +117,7 @@ public class DatasourceResource {
     if(statsIndexManager == null) throw new IllegalArgumentException("statsIndexManager cannot be null");
     if(esProvider == null) throw new IllegalArgumentException("opalSearchService cannot be null");
     if(viewDtos == null) throw new IllegalArgumentException("viewDtos cannot be null");
+    if(userProvider == null) throw new IllegalArgumentException("userProvider cannot be null");
 
     this.configService = configService;
     this.importService = importService;
@@ -119,6 +128,7 @@ public class DatasourceResource {
     this.esProvider = esProvider;
     this.viewDtos = viewDtos;
     this.tableListeners = tableListeners;
+    this.userProvider = userProvider;
   }
 
   public void setName(String name) {
@@ -229,6 +239,57 @@ public class DatasourceResource {
       localeDtos.add(Dtos.asDto(locale, displayLocale != null ? new Locale(displayLocale) : null));
     }
     return localeDtos;
+  }
+
+  @POST
+  @Path("/commands/_import")
+  public Response importData(Commands.ImportCommandOptionsDto options) {
+    if(!name.equals(options.getDestination())) {
+      throw new InvalidRequestException("DataCanOnlyBeImportedInCurrentDatasource", name);
+    }
+
+    List<ImportConfig> configs = new ArrayList<ImportConfig>();
+
+    String user = userProvider.getUsername();
+    String jobId = user + "-" + name + "-" + System.currentTimeMillis();
+
+    for(String table : options.getTablesList()) {
+      configs.add(new ImportConfig() //
+          .withJobId(jobId) //
+          .withUser(user) //
+          .withTable(table) //
+          .withArchiveDir(options.getArchive()) //
+          .withDestination(name) //
+          .withForce(options.getForce()) //
+          .withIgnoreUnknownIdentifier(options.getIgnore()) //
+          .withIncremental(options.getIncremental()) //
+          .withSource(options.getSource()) //
+          .withUnit(options.getUnit()));
+    }
+
+    for(String file : options.getFilesList()) {
+      configs.add(new ImportConfig() //
+          .withJobId(jobId) //
+          .withUser(user) //
+          .withFile(file) //
+          .withArchiveDir(options.getArchive()) //
+          .withDestination(name) //
+          .withForce(options.getForce()) //
+          .withIgnoreUnknownIdentifier(options.getIgnore()) //
+          .withIncremental(options.getIncremental()) //
+          .withSource(options.getSource()) //
+          .withUnit(options.getUnit()));
+    }
+
+    // TODO check file access
+
+    try {
+      importService.batchImport(configs);
+    } catch(JobExecutionException e) {
+      return Response.status(BAD_REQUEST)
+          .entity(ClientErrorDtos.getErrorMessage(BAD_REQUEST, "ImportJobExecutionException", e).build()).build();
+    }
+    return Response.ok().build();
   }
 
   Datasource getDatasource() {

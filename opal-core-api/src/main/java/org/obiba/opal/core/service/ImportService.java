@@ -21,8 +21,10 @@ import org.obiba.magma.Datasource;
 import org.obiba.magma.NoSuchDatasourceException;
 import org.obiba.magma.NoSuchValueTableException;
 import org.obiba.magma.ValueTable;
+import org.obiba.opal.core.domain.batch.ImportConfig;
 import org.obiba.opal.core.domain.participant.identifier.IParticipantIdentifier;
 import org.obiba.opal.core.unit.FunctionalUnit;
+import org.springframework.batch.core.JobExecutionException;
 
 /**
  * Service for import-related operations.
@@ -80,6 +82,11 @@ public interface ImportService {
    * @throws InterruptedException
    */
   void importData(List<String> sourceTableNames, String destinationDatasourceName, boolean allowIdentifierGeneration,
+      boolean ignoreUnknownIdentifier)
+      throws NoSuchFunctionalUnitException, NoSuchDatasourceException, NoSuchValueTableException,
+      NonExistentVariableEntitiesException, IOException, InterruptedException;
+
+  void importDataFromTable(String sourceTableName, String destinationDatasourceName, boolean allowIdentifierGeneration,
       boolean ignoreUnknownIdentifier)
       throws NoSuchFunctionalUnitException, NoSuchDatasourceException, NoSuchValueTableException,
       NonExistentVariableEntitiesException, IOException, InterruptedException;
@@ -161,5 +168,7 @@ public interface ImportService {
    * @throws IOException
    */
   void importIdentifiers(ValueTable sourceValueTable) throws IOException;
+
+  void batchImport(List<ImportConfig> configs) throws JobExecutionException;
 
 }

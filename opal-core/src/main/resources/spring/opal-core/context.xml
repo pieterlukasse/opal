@@ -6,11 +6,11 @@
   <context:annotation-config/>
 
   <import resource="tx.xml"/>
+  <import resource="batch.xml"/>
   <import resource="hibernate-services.xml"/>
   <import resource="version.xml"/>
   <import resource="quartz.xml"/>
   <import resource="email.xml"/>
-
   <import resource="classpath*:/META-INF/opal/context.xml"/>
 
   <bean id="participantIdentifier"

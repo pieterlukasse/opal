@@ -11,6 +11,7 @@ package org.obiba.opal.shell.commands;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -179,14 +180,14 @@ public class ReportCommandTest {
       }
 
       @Override
-      String getMergedVelocityTemplate(Map<String, String> model) {
+      String getMergedVelocityTemplate(Map<String, Object> model) {
         return model.get("report_template") + "," + model.get("report_public_link");
       }
     };
   }
 
   private ReportTemplate createReportTemplate(String name, String design, String format,
-      Set<String> emailNotificationAddresses) {
+      Collection<String> emailNotificationAddresses) {
     ReportTemplate reportTemplate = new ReportTemplate();
 
     reportTemplate.setName(name);

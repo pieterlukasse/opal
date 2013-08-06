@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileType;
+import org.obiba.core.service.PersistenceManager;
 import org.obiba.magma.Datasource;
 import org.obiba.magma.MagmaEngine;
 import org.obiba.magma.NoSuchDatasourceException;
@@ -33,6 +34,7 @@ import org.obiba.magma.lang.Closeables;
 import org.obiba.magma.support.DatasourceCopier;
 import org.obiba.magma.support.MagmaEngineTableResolver;
 import org.obiba.magma.support.StaticValueTable;
+import org.obiba.opal.core.domain.batch.ImportConfig;
 import org.obiba.opal.core.domain.participant.identifier.IParticipantIdentifier;
 import org.obiba.opal.core.magma.PrivateVariableEntityMap;
 import org.obiba.opal.core.runtime.OpalRuntime;
@@ -47,7 +49,13 @@ import org.obiba.opal.core.unit.FunctionalUnitIdentifiers.UnitIdentifier;
 import org.obiba.opal.core.unit.FunctionalUnitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionException;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 
@@ -56,6 +64,8 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+
+import static org.springframework.util.Assert.notNull;
 
 /**
  * Default implementation of {@link ImportService}.
@@ -78,16 +88,26 @@ public class DefaultImportService implements ImportService {
 
   private final IdentifierService identifierService;
 
+  private final JobLauncher jobLauncher;
+
+  private final Job importJob;
+
+  private final PersistenceManager persistenceManager;
+
   @Autowired
   public DefaultImportService(TransactionTemplate txTemplate, FunctionalUnitService functionalUnitService,
       OpalRuntime opalRuntime, IParticipantIdentifier participantIdentifier,
-      IdentifiersTableService identifiersTableService, IdentifierService identifierService) {
+      IdentifiersTableService identifiersTableService, IdentifierService identifierService, JobLauncher jobLauncher,
+      Job importJob, PersistenceManager persistenceManager) {
 
-    Assert.notNull(txTemplate, "txManager cannot be null");
-    Assert.notNull(functionalUnitService, "functionalUnitService cannot be null");
-    Assert.notNull(opalRuntime, "opalRuntime cannot be null");
-    Assert.notNull(participantIdentifier, "participantIdentifier cannot be null");
-    Assert.notNull(identifiersTableService, "identifiersTableService cannot be null");
+    notNull(txTemplate, "txManager cannot be null");
+    notNull(functionalUnitService, "functionalUnitService cannot be null");
+    notNull(opalRuntime, "opalRuntime cannot be null");
+    notNull(participantIdentifier, "participantIdentifier cannot be null");
+    notNull(identifiersTableService, "identifiersTableService cannot be null");
+    notNull(jobLauncher, "jobLauncher cannot be null");
+    notNull(importJob, "importJob cannot be null");
+    notNull(persistenceManager, "persistenceManager cannot be null");
 
     this.txTemplate = txTemplate;
     this.txTemplate.setIsolationLevel(TransactionTemplate.ISOLATION_READ_COMMITTED);
@@ -96,6 +116,9 @@ public class DefaultImportService implements ImportService {
     this.participantIdentifier = participantIdentifier;
     this.identifierService = identifierService;
     this.identifiersTableService = identifiersTableService;
+    this.jobLauncher = jobLauncher;
+    this.importJob = importJob;
+    this.persistenceManager = persistenceManager;
   }
 
   @Override
@@ -108,7 +131,7 @@ public class DefaultImportService implements ImportService {
     Assert.isTrue(!Objects.equal(nonEmptyUnitName, FunctionalUnit.OPAL_INSTANCE),
         "unitName cannot be " + FunctionalUnit.OPAL_INSTANCE);
     Assert.hasText(destinationDatasourceName, "datasourceName is null or empty");
-    Assert.notNull(sourceFile, "file is null");
+    notNull(sourceFile, "file is null");
     Assert.isTrue(sourceFile.getType() == FileType.FILE, "No such file (" + sourceFile.getName().getPath() + ")");
 
     // Validate the datasource name.
@@ -150,7 +173,7 @@ public class DefaultImportService implements ImportService {
       boolean allowIdentifierGeneration, boolean ignoreUnknownIdentifier)
       throws NoSuchFunctionalUnitException, NoSuchDatasourceException, NoSuchValueTableException,
       NonExistentVariableEntitiesException, IOException, InterruptedException {
-    Assert.notNull(sourceTableNames, "sourceTableNames is null");
+    notNull(sourceTableNames, "sourceTableNames is null");
     Assert.notEmpty(sourceTableNames, "sourceTableNames is empty");
 
     ImmutableSet.Builder<ValueTable> builder = ImmutableSet.builder();
@@ -159,6 +182,28 @@ public class DefaultImportService implements ImportService {
       Datasource ds = getDatasourceOrTransientDatasource(resolver.getDatasourceName());
       builder.add(ds.getValueTable(resolver.getTableName()));
     }
+    Set<ValueTable> sourceTables = builder.build();
+    try {
+      importData(sourceTables, destinationDatasourceName, allowIdentifierGeneration, ignoreUnknownIdentifier);
+    } finally {
+      for(ValueTable table : sourceTables) {
+        MagmaEngine.get().removeTransientDatasource(table.getDatasource().getName());
+      }
+    }
+  }
+
+  @Override
+  public void importDataFromTable(String sourceTableName, String destinationDatasourceName,
+      boolean allowIdentifierGeneration, boolean ignoreUnknownIdentifier)
+      throws NoSuchFunctionalUnitException, NoSuchDatasourceException, NoSuchValueTableException,
+      NonExistentVariableEntitiesException, IOException, InterruptedException {
+    notNull(sourceTableName, "sourceTableNames is null");
+
+    MagmaEngineTableResolver resolver = MagmaEngineTableResolver.valueOf(sourceTableName);
+    Datasource ds = getDatasourceOrTransientDatasource(resolver.getDatasourceName());
+
+    ImmutableSet.Builder<ValueTable> builder = ImmutableSet.builder();
+    builder.add(ds.getValueTable(resolver.getTableName()));
     Set<ValueTable> sourceTables = builder.build();
     try {
       importData(sourceTables, destinationDatasourceName, allowIdentifierGeneration, ignoreUnknownIdentifier);
@@ -356,6 +401,26 @@ public class DefaultImportService implements ImportService {
       }
       throw new RuntimeException(ex.getCause());
     }
+  }
+
+  @Override
+  public void batchImport(final List<ImportConfig> configs) throws JobExecutionException {
+
+    notNull(configs);
+    Assert.notEmpty(configs);
+
+    // store configurations
+    txTemplate.execute(new TransactionCallbackWithoutResult() {
+      @Override
+      protected void doInTransactionWithoutResult(TransactionStatus status) {
+        for(ImportConfig config : configs) {
+          persistenceManager.save(config);
+        }
+      }
+    });
+
+    JobParametersBuilder builder = new JobParametersBuilder().addString("jobId", configs.get(0).getJobId());
+    jobLauncher.run(importJob, builder.toJobParameters());
   }
 
 }
