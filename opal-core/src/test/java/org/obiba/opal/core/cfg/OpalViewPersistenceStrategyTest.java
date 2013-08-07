@@ -65,7 +65,7 @@ public class OpalViewPersistenceStrategyTest {
   }
 
   @Test(expected = StreamException.class)
-  public void testReadofEmptyViewFileThrowsStreamException() throws Exception {
+  public void testReadOfEmptyViewFileThrowsStreamException() throws Exception {
     Set<View> result = viewPersistenceStrategy.readViews("empty-views");
     assertThat(result.isEmpty(), is(true));
   }
@@ -116,6 +116,6 @@ public class OpalViewPersistenceStrategyTest {
   }
 
   private String getTestFilesRoot() {
-    return this.getClass().getResource("/" + this.getClass().getSimpleName()).getFile();
+    return getClass().getResource("/" + getClass().getSimpleName()).getFile();
   }
 }
