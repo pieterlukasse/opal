@@ -34,7 +34,7 @@ import org.obiba.magma.lang.Closeables;
 import org.obiba.magma.support.DatasourceCopier;
 import org.obiba.magma.support.MagmaEngineTableResolver;
 import org.obiba.magma.support.StaticValueTable;
-import org.obiba.opal.core.domain.batch.ImportConfig;
+import org.obiba.opal.core.domain.batch.BatchImportConfig;
 import org.obiba.opal.core.domain.participant.identifier.IParticipantIdentifier;
 import org.obiba.opal.core.magma.PrivateVariableEntityMap;
 import org.obiba.opal.core.runtime.OpalRuntime;
@@ -404,7 +404,7 @@ public class DefaultImportService implements ImportService {
   }
 
   @Override
-  public void batchImport(final List<ImportConfig> configs) throws JobExecutionException {
+  public void batchImport(final List<BatchImportConfig> configs) throws JobExecutionException {
 
     notNull(configs);
     Assert.notEmpty(configs);
@@ -413,7 +413,7 @@ public class DefaultImportService implements ImportService {
     txTemplate.execute(new TransactionCallbackWithoutResult() {
       @Override
       protected void doInTransactionWithoutResult(TransactionStatus status) {
-        for(ImportConfig config : configs) {
+        for(BatchImportConfig config : configs) {
           persistenceManager.save(config);
         }
       }

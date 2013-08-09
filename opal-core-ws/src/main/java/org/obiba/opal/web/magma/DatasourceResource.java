@@ -41,7 +41,7 @@ import org.obiba.magma.views.ViewManager;
 import org.obiba.opal.core.cfg.OpalConfiguration;
 import org.obiba.opal.core.cfg.OpalConfigurationService;
 import org.obiba.opal.core.cfg.OpalConfigurationService.ConfigModificationTask;
-import org.obiba.opal.core.domain.batch.ImportConfig;
+import org.obiba.opal.core.domain.batch.BatchImportConfig;
 import org.obiba.opal.core.runtime.security.support.OpalPermissions;
 import org.obiba.opal.core.service.ImportService;
 import org.obiba.opal.search.IndexManagerConfigurationService;
@@ -64,8 +64,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.google.common.annotations.VisibleForTesting;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
@@ -248,19 +246,19 @@ public class DatasourceResource {
       throw new InvalidRequestException("DataCanOnlyBeImportedInCurrentDatasource", name);
     }
 
-    List<ImportConfig> configs = new ArrayList<ImportConfig>();
+    List<BatchImportConfig> configs = new ArrayList<BatchImportConfig>();
 
     String user = userProvider.getUsername();
     String jobId = user + "-" + name + "-" + System.currentTimeMillis();
 
     for(String table : options.getTablesList()) {
-      configs.add(new ImportConfig() //
+      configs.add(new BatchImportConfig() //
           .withJobId(jobId) //
           .withUser(user) //
           .withTable(table) //
           .withArchiveDir(options.getArchive()) //
           .withDestination(name) //
-          .withForce(options.getForce()) //
+          .withForceUnknownIdCreation(options.getForce()) //
           .withIgnoreUnknownIdentifier(options.getIgnore()) //
           .withIncremental(options.getIncremental()) //
           .withSource(options.getSource()) //
@@ -268,13 +266,13 @@ public class DatasourceResource {
     }
 
     for(String file : options.getFilesList()) {
-      configs.add(new ImportConfig() //
+      configs.add(new BatchImportConfig() //
           .withJobId(jobId) //
           .withUser(user) //
           .withFile(file) //
           .withArchiveDir(options.getArchive()) //
           .withDestination(name) //
-          .withForce(options.getForce()) //
+          .withForceUnknownIdCreation(options.getForce()) //
           .withIgnoreUnknownIdentifier(options.getIgnore()) //
           .withIncremental(options.getIncremental()) //
           .withSource(options.getSource()) //

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.obiba.opal.core.domain.batch.ImportConfig;
+import org.obiba.opal.core.domain.batch.BatchImportConfig;
 import org.obiba.opal.core.runtime.OpalRuntime;
 import org.obiba.opal.core.service.ImportService;
 import org.obiba.opal.core.service.NoSuchFunctionalUnitException;
@@ -19,24 +19,17 @@ import org.springframework.context.ApplicationContext;
 
 import com.google.common.base.Strings;
 
-public class ImportProcessor implements ItemProcessor<ImportConfig, Void> {
+public class ImportProcessor implements ItemProcessor<BatchImportConfig, Void> {
 
   private static final Logger log = LoggerFactory.getLogger(ImportProcessor.class);
-
-//  @Autowired
-//  private OpalRuntime opalRuntime;
-
-  @Autowired
-  private ImportService importService;
-
-//  @Autowired
-//  private FunctionalUnitService functionalUnitService;
 
   @Autowired
   private ApplicationContext applicationContext;
 
   @Override
-  public Void process(ImportConfig importConfig) throws Exception {
+  public Void process(BatchImportConfig importConfig) throws Exception {
+
+    log.info(">>> applicationContext: {}", applicationContext);
 
     String unit = importConfig.getUnit();
     if(!Strings.isNullOrEmpty(unit) && !getFunctionalUnitService().hasFunctionalUnit(unit)) {
@@ -47,39 +40,43 @@ public class ImportProcessor implements ItemProcessor<ImportConfig, Void> {
     FileObject fileObject = Strings.isNullOrEmpty(file) ? null : resolveFile(file, unit);
 
     if(!Strings.isNullOrEmpty(importConfig.getSource())) {
+      log.info(">>> importFromDatasource");
       importFromDatasource(importConfig, fileObject);
     } else if(!Strings.isNullOrEmpty(importConfig.getTable())) {
+      log.info(">>> importFromTable");
       importFromTable(importConfig, fileObject);
     } else if(fileObject != null) {
+      log.info(">>> importFiles");
       importFiles(importConfig, fileObject);
     }
     return null;
   }
 
-  private void importFromDatasource(ImportConfig importConfig, @Nullable FileObject file)
+  private void importFromDatasource(BatchImportConfig importConfig, @Nullable FileObject file)
       throws IOException, InterruptedException {
     log.info("Importing datasource: {}", importConfig.getSource());
-    importService.importData(importConfig.getSource(), importConfig.getDestination(), importConfig.isForce(),
-        importConfig.isIgnoreUnknownIdentifier());
+    getImportService()
+        .importData(importConfig.getSource(), importConfig.getDestination(), importConfig.isForceUnknownIdCreation(),
+            importConfig.isIgnoreUnknownIdentifier());
     if(file != null) archive(file, importConfig);
   }
 
-  private void importFromTable(ImportConfig importConfig, @Nullable FileObject file)
+  private void importFromTable(BatchImportConfig importConfig, @Nullable FileObject file)
       throws IOException, InterruptedException {
     log.info("Importing table: {}", importConfig.getTable());
-    importService.importDataFromTable(importConfig.getTable(), importConfig.getDestination(), importConfig.isForce(),
-        importConfig.isIgnoreUnknownIdentifier());
+    getImportService().importDataFromTable(importConfig.getTable(), importConfig.getDestination(),
+        importConfig.isForceUnknownIdCreation(), importConfig.isIgnoreUnknownIdentifier());
     if(file != null) archive(file, importConfig);
   }
 
-  private void importFiles(ImportConfig importConfig, FileObject file) throws IOException, InterruptedException {
+  private void importFiles(BatchImportConfig importConfig, FileObject file) throws IOException, InterruptedException {
     log.info("Importing file: {}", file.getName().getPath());
-    importService.importData(importConfig.getUnit(), file, importConfig.getDestination(), importConfig.isForce(),
-        importConfig.isIgnoreUnknownIdentifier());
+    getImportService().importData(importConfig.getUnit(), file, importConfig.getDestination(),
+        importConfig.isForceUnknownIdCreation(), importConfig.isIgnoreUnknownIdentifier());
     archive(file, importConfig);
   }
 
-  private void archive(FileObject file, ImportConfig importConfig) throws IOException {
+  private void archive(FileObject file, BatchImportConfig importConfig) throws IOException {
     String archiveDir = importConfig.getArchiveDir();
     if(Strings.isNullOrEmpty(archiveDir)) {
       return;
@@ -142,6 +139,10 @@ public class ImportProcessor implements ItemProcessor<ImportConfig, Void> {
 
   private FunctionalUnitService getFunctionalUnitService() {
     return applicationContext.getBean(FunctionalUnitService.class);
+  }
+
+  private ImportService getImportService() {
+    return applicationContext.getBean(ImportService.class);
   }
 
 }

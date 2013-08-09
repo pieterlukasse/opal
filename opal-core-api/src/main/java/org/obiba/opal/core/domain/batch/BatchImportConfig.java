@@ -3,6 +3,7 @@ package org.obiba.opal.core.domain.batch;
 import java.io.Serializable;
 
 import javax.annotation.Nonnull;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -11,7 +12,7 @@ import javax.persistence.Table;
 @SuppressWarnings("ParameterHidesMemberVariable")
 @Entity
 @Table(name = "batch_import_config")
-public class ImportConfig implements Serializable {
+public class BatchImportConfig implements Serializable {
 
   private static final long serialVersionUID = 1923224550722152371L;
 
@@ -26,10 +27,11 @@ public class ImportConfig implements Serializable {
    * User that started this job
    */
   @Nonnull
+  @Column(name = "username")
   private String user;
 
   /**
-   * The functional unit. If supplied, imported identifiers must exist in opal, otherwise use 'force' option.
+   * The functional unit. If supplied, imported identifiers must exist in opal, otherwise use 'forceUnknownIdCreation' option.
    * If no unit is supplied, identifiers are imported as is.
    */
   private String unit;
@@ -59,11 +61,12 @@ public class ImportConfig implements Serializable {
    * Forces participant creation when an unknown participant's identifier is encountered in a functional unit.
    * Ignored when no functional unit is specified.
    */
-  private boolean force;
+  private boolean forceUnknownIdCreation;
 
   /**
    * Import specified table.
    */
+  @Column(name = "table_to_import")
   private String table;
 
   /**
@@ -144,12 +147,12 @@ public class ImportConfig implements Serializable {
     this.source = source;
   }
 
-  public boolean isForce() {
-    return force;
+  public boolean isForceUnknownIdCreation() {
+    return forceUnknownIdCreation;
   }
 
-  public void setForce(boolean force) {
-    this.force = force;
+  public void setForceUnknownIdCreation(boolean forceUnknownIdCreation) {
+    this.forceUnknownIdCreation = forceUnknownIdCreation;
   }
 
   public String getTable() {
@@ -176,57 +179,57 @@ public class ImportConfig implements Serializable {
     this.incremental = incremental;
   }
 
-  public ImportConfig withJobId(String jobId) {
+  public BatchImportConfig withJobId(String jobId) {
     this.jobId = jobId;
     return this;
   }
 
-  public ImportConfig withUser(String user) {
+  public BatchImportConfig withUser(String user) {
     this.user = user;
     return this;
   }
 
-  public ImportConfig withUnit(String unit) {
+  public BatchImportConfig withUnit(String unit) {
     this.unit = unit;
     return this;
   }
 
-  public ImportConfig withDestination(String destination) {
+  public BatchImportConfig withDestination(String destination) {
     this.destination = destination;
     return this;
   }
 
-  public ImportConfig withFile(String file) {
+  public BatchImportConfig withFile(String file) {
     this.file = file;
     return this;
   }
 
-  public ImportConfig withArchiveDir(String archiveDir) {
+  public BatchImportConfig withArchiveDir(String archiveDir) {
     this.archiveDir = archiveDir;
     return this;
   }
 
-  public ImportConfig withSource(String source) {
+  public BatchImportConfig withSource(String source) {
     this.source = source;
     return this;
   }
 
-  public ImportConfig withForce(boolean force) {
-    this.force = force;
+  public BatchImportConfig withForceUnknownIdCreation(boolean forceUnknownIdCreation) {
+    this.forceUnknownIdCreation = forceUnknownIdCreation;
     return this;
   }
 
-  public ImportConfig withTable(String table) {
+  public BatchImportConfig withTable(String table) {
     this.table = table;
     return this;
   }
 
-  public ImportConfig withIgnoreUnknownIdentifier(boolean ignoreUnknownIdentifier) {
+  public BatchImportConfig withIgnoreUnknownIdentifier(boolean ignoreUnknownIdentifier) {
     this.ignoreUnknownIdentifier = ignoreUnknownIdentifier;
     return this;
   }
 
-  public ImportConfig withIncremental(boolean incremental) {
+  public BatchImportConfig withIncremental(boolean incremental) {
     this.incremental = incremental;
     return this;
   }

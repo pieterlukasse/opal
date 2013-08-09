@@ -12,6 +12,7 @@ package org.obiba.opal.core.domain.user;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,8 +31,9 @@ public class Group extends AbstractEntity implements Comparable<Group> {
 
   private static final long serialVersionUID = -5985745491689725964L;
 
+  @Nonnull
   @Column(nullable = false, unique = true)
-  private String name = null;
+  private String name;
 
   @ManyToMany(cascade = CascadeType.ALL)
   @JoinTable(name = "user_groups",

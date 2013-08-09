@@ -21,7 +21,7 @@ import org.obiba.magma.Datasource;
 import org.obiba.magma.NoSuchDatasourceException;
 import org.obiba.magma.NoSuchValueTableException;
 import org.obiba.magma.ValueTable;
-import org.obiba.opal.core.domain.batch.ImportConfig;
+import org.obiba.opal.core.domain.batch.BatchImportConfig;
 import org.obiba.opal.core.domain.participant.identifier.IParticipantIdentifier;
 import org.obiba.opal.core.unit.FunctionalUnit;
 import org.springframework.batch.core.JobExecutionException;
@@ -169,6 +169,6 @@ public interface ImportService {
    */
   void importIdentifiers(ValueTable sourceValueTable) throws IOException;
 
-  void batchImport(List<ImportConfig> configs) throws JobExecutionException;
+  void batchImport(List<BatchImportConfig> configs) throws JobExecutionException;
 
 }
