@@ -102,7 +102,7 @@ public class Dtos {
         .setSqlSchema(SqlSettingsDto.SqlSchema.valueOf(db.getSqlSchema().name())) //
         .setUrl(db.getUrl()) //
         .setUsername(db.getUsername());
-    if(!Strings.isNullOrEmpty(db.getPassword())) builder.setPassword(db.getPassword());
+    // do not copy password to DTO
     if(!Strings.isNullOrEmpty(db.getProperties())) builder.setProperties(db.getProperties());
     switch(db.getSqlSchema()) {
       case JDBC:
@@ -149,7 +149,7 @@ public class Dtos {
     MongoDbSettingsDto.Builder builder = MongoDbSettingsDto.newBuilder() //
         .setUrl(db.getUrl());
     if(!Strings.isNullOrEmpty(db.getUsername())) builder.setUsername(db.getUsername());
-    if(!Strings.isNullOrEmpty(db.getPassword())) builder.setPassword(db.getPassword());
+    // do not copy password to DTO
     if(!Strings.isNullOrEmpty(db.getProperties())) builder.setProperties(db.getProperties());
     return builder;
   }
