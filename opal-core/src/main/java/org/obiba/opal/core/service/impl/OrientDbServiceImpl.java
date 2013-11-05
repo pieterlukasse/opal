@@ -71,29 +71,6 @@ public class OrientDbServiceImpl implements OrientDbService {
     }
   }
 
-  public <T> void saveNonUnique(@NotNull T t) {
-    //noinspection ConstantConditions
-    Preconditions.checkArgument(t != null, "t cannot be null");
-
-    defaultBeanValidator.validate(t);
-
-    ODatabaseDocumentTx db = serverFactory.getDocumentTx();
-    try {
-
-      ODocument document = toDocument(t);
-      db.begin(OTransaction.TXTYPE.OPTIMISTIC);
-      log.debug("save {}", document);
-      document.save();
-      db.commit();
-
-    } catch(OException e) {
-      db.rollback();
-      throw e;
-    } finally {
-      db.close();
-    }
-  }
-
   @Override
   public void save(@Nullable HasUniqueProperties template, @NotNull HasUniqueProperties hasUniqueProperties)
       throws ConstraintViolationException {
