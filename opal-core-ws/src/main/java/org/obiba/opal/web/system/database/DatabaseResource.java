@@ -13,10 +13,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.obiba.magma.datasource.mongodb.MongoDBDatasourceFactory;
-import org.obiba.magma.support.EntitiesPredicate;
 import org.obiba.opal.core.domain.database.Database;
 import org.obiba.opal.core.domain.database.MongoDbSettings;
-import org.obiba.opal.core.service.IdentifiersTableService;
 import org.obiba.opal.core.service.database.DatabaseRegistry;
 import org.obiba.opal.core.service.database.MultipleIdentifiersDatabaseException;
 import org.obiba.opal.web.database.Dtos;
@@ -41,9 +39,6 @@ public class DatabaseResource {
   @Autowired
   private DatabaseRegistry databaseRegistry;
 
-  @Autowired
-  private IdentifiersTableService identifiersTableService;
-
   @PathParam("name")
   private String name;
 
@@ -59,16 +54,6 @@ public class DatabaseResource {
   @DELETE
   public Response delete() {
     Database database = getDatabase();
-    if(database.isUsedForIdentifiers()) {
-      if (identifiersTableService.hasEntities(new EntitiesPredicate.NonViewEntitiesPredicate())) {
-        return Response.status(BAD_REQUEST)
-            .entity(ClientErrorDtos.getErrorMessage(BAD_REQUEST, "DatabaseHasEntities").build()).build();
-      }
-      identifiersTableService.unregisterDatabase();
-    } else if(!database.isEditable()) {
-      return Response.status(BAD_REQUEST)
-          .entity(ClientErrorDtos.getErrorMessage(BAD_REQUEST, "DatabaseIsNotEditable").build()).build();
-    }
     databaseRegistry.delete(database);
     return Response.ok().build();
   }

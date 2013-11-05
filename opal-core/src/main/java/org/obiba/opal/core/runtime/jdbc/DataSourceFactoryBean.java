@@ -24,6 +24,8 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource> {
 
   private static final int MAX_IDLE = 10;
 
+  private static final int MAX_LIFETIME = 30;
+
   private String name;
 
   private String driverClass;
@@ -45,15 +47,16 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource> {
     dataSource.setMinPoolSize(MIN_POOL_SIZE);
     dataSource.setMaxPoolSize(MAX_POOL_SIZE);
     dataSource.setMaxIdleTime(MAX_IDLE);
+    dataSource.setMaxLifetime(MAX_LIFETIME);
 
-    if("com.mysql.jdbc.Driver".equals(driverClass)) {
-      dataSource.setTestQuery("select 1");
-    } else if("org.hsqldb.jdbcDriver".equals(driverClass)) {
-      dataSource.setTestQuery("select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
-    } else {
-      throw new IllegalArgumentException("Unsupported JDBC driver: " + driverClass);
-    }
-    //TODO validation query for PostgreSQL
+//    if("com.mysql.jdbc.Driver".equals(driverClass)) {
+//      dataSource.setTestQuery("select 1");
+//    } else if("org.hsqldb.jdbcDriver".equals(driverClass)) {
+//      dataSource.setTestQuery("select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
+//    } else {
+//      throw new IllegalArgumentException("Unsupported JDBC driver: " + driverClass);
+//    }
+//    //TODO validation query for PostgreSQL
     return dataSource;
   }
 

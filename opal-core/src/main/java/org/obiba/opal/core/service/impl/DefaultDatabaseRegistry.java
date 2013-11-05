@@ -11,6 +11,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.obiba.magma.DatasourceFactory;
 import org.obiba.magma.datasource.hibernate.support.HibernateDatasourceFactory;
+import org.obiba.magma.support.EntitiesPredicate;
 import org.obiba.opal.core.domain.HasUniqueProperties;
 import org.obiba.opal.core.domain.database.Database;
 import org.obiba.opal.core.domain.database.MongoDbSettings;
@@ -18,6 +19,7 @@ import org.obiba.opal.core.domain.database.SqlSettings;
 import org.obiba.opal.core.runtime.jdbc.DataSourceFactory;
 import org.obiba.opal.core.runtime.jdbc.DatabaseSessionFactoryProvider;
 import org.obiba.opal.core.runtime.jdbc.SessionFactoryFactory;
+import org.obiba.opal.core.service.IdentifiersTableService;
 import org.obiba.opal.core.service.OrientDbService;
 import org.obiba.opal.core.service.database.CannotDeleteDatabaseWithDataException;
 import org.obiba.opal.core.service.database.DatabaseRegistry;
@@ -27,6 +29,7 @@ import org.obiba.opal.core.service.database.NoSuchDatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.atomikos.jdbc.AbstractDataSourceBean;
@@ -58,6 +61,9 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
 
   @Autowired
   private OrientDbService orientDbService;
+
+  @Autowired
+  private ApplicationContext applicationContext;
 
   private final LoadingCache<String, DataSource> dataSourceCache = CacheBuilder.newBuilder()
       .removalListener(new DataSourceRemovalListener()) //
@@ -178,11 +184,15 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
 
   @Override
   public void delete(@NotNull Database database) throws CannotDeleteDatabaseWithDataException {
-    if(!database.isEditable()) {
+    if(database.isUsedForIdentifiers()) {
+      IdentifiersTableService identifiersTableService = applicationContext.getBean(IdentifiersTableService.class);
+      if(identifiersTableService.hasEntities(new EntitiesPredicate.NonViewEntitiesPredicate())) {
+        throw new IllegalArgumentException("Cannot delete identifiers database with entities");
+      }
+      unregister(database.getName(), identifiersTableService.getDatasourceName());
+    } else if(!database.isEditable()) {
       throw new IllegalArgumentException("Cannot delete non editable database");
     }
-
-    //TODO check if this database has data
     orientDbService.delete(database);
     destroyDataSource(database.getName());
   }

@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.base.Predicate;
@@ -108,13 +106,7 @@ public class DefaultIdentifiersTableService implements IdentifiersTableService {
 
   @Override
   public void unregisterDatabase() {
-    transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-      @Override
-      protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-        destroy();
-      }
-    });
-    databaseRegistry.unregister(databaseRegistry.getIdentifiersDatabase().getName(), getDatasourceName());
+    destroy();
   }
 
   private MagmaEngineReferenceResolver getTableResolver() {
