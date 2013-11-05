@@ -55,7 +55,6 @@ public class DataSourceFactoryBean implements FactoryBean<DataSource> {
         throw new IllegalArgumentException("Unsupported JDBC driver: " + driverClass);
       }
       //TODO validation query for PostgreSQL
-
       return dataSource;
     } catch(PropertyVetoException e) {
       throw new RuntimeException("Cannot create JDBC dataSource", e);
