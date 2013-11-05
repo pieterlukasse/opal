@@ -29,7 +29,6 @@ import org.obiba.opal.core.service.database.NoSuchDatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.atomikos.jdbc.AbstractDataSourceBean;
@@ -63,7 +62,7 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
   private OrientDbService orientDbService;
 
   @Autowired
-  private ApplicationContext applicationContext;
+  private IdentifiersTableService identifiersTableService;
 
   private final LoadingCache<String, DataSource> dataSourceCache = CacheBuilder.newBuilder()
       .removalListener(new DataSourceRemovalListener()) //
@@ -185,7 +184,6 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
   @Override
   public void delete(@NotNull Database database) throws CannotDeleteDatabaseWithDataException {
     if(database.isUsedForIdentifiers()) {
-      IdentifiersTableService identifiersTableService = applicationContext.getBean(IdentifiersTableService.class);
       if(identifiersTableService.hasEntities(new EntitiesPredicate.NonViewEntitiesPredicate())) {
         throw new IllegalArgumentException("Cannot delete identifiers database with entities");
       }
@@ -279,7 +277,9 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
     public void onRemoval(RemovalNotification<String, DataSource> notification) {
       log.info("Destroying DataSource {}", notification.getKey());
       DataSource dataSource = notification.getValue();
-      if(dataSource != null) ((AbstractDataSourceBean) dataSource).close();
+      if(dataSource != null) {
+        ((AbstractDataSourceBean) dataSource).close();
+      }
     }
   }
 
@@ -297,8 +297,10 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
     public void onRemoval(RemovalNotification<String, SessionFactory> notification) {
       try {
         log.info("Destroying SessionFactory {}", notification.getKey());
-        SessionFactory sf = notification.getValue();
-        if(sf != null) sf.close();
+        SessionFactory sessionFactory = notification.getValue();
+        if(sessionFactory != null) {
+          sessionFactory.close();
+        }
       } catch(HibernateException e) {
         log.warn("Ignoring exception during SessionFactory shutdown: ", e);
       }
