@@ -42,32 +42,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Component
+@Transactional
 @Path("/datasources")
 public class DatasourcesResource {
 
   @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(DatasourcesResource.class);
 
-  private final DatasourceFactoryRegistry datasourceFactoryRegistry;
+  private DatasourceFactoryRegistry datasourceFactoryRegistry;
 
-  private final OpalConfigurationService configService;
-
-  @Autowired
-  public DatasourcesResource(DatasourceFactoryRegistry datasourceFactoryRegistry,
-      OpalConfigurationService configService) {
-    if(datasourceFactoryRegistry == null)
-      throw new IllegalArgumentException("datasourceFactoryRegistry cannot be null");
-    if(configService == null) throw new IllegalArgumentException("configService cannot be null");
-
-    this.configService = configService;
-    this.datasourceFactoryRegistry = datasourceFactoryRegistry;
-  }
+  private OpalConfigurationService configService;
 
   @GET
   public List<Magma.DatasourceDto> getDatasources() {
@@ -138,4 +129,13 @@ public class DatasourcesResource {
     });
   }
 
+  @Autowired
+  public void setConfigService(OpalConfigurationService configService) {
+    this.configService = configService;
+  }
+
+  @Autowired
+  public void setDatasourceFactoryRegistry(DatasourceFactoryRegistry datasourceFactoryRegistry) {
+    this.datasourceFactoryRegistry = datasourceFactoryRegistry;
+  }
 }

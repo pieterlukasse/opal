@@ -23,12 +23,14 @@ import org.obiba.opal.web.ws.security.NoAuthorization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 @Component
+@Transactional
 @Path("/participants")
 public class ParticipantsResource {
 

@@ -22,6 +22,7 @@ import javax.ws.rs.core.UriInfo;
 import org.obiba.magma.DuplicateDatasourceNameException;
 import org.obiba.magma.MagmaRuntimeException;
 import org.obiba.magma.support.DatasourceParsingException;
+import org.obiba.opal.core.service.impl.TransactionDebug;
 import org.obiba.opal.project.ProjectService;
 import org.obiba.opal.project.domain.Project;
 import org.obiba.opal.web.magma.ClientErrorDtos;
@@ -29,12 +30,14 @@ import org.obiba.opal.web.magma.support.NoSuchDatasourceFactoryException;
 import org.obiba.opal.web.model.Projects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Component
+@Transactional
 @Path("/projects")
 public class ProjectsResource {
 
@@ -42,7 +45,11 @@ public class ProjectsResource {
   private ProjectService projectService;
 
   @GET
+  @Transactional(readOnly = true)
   public List<Projects.ProjectDto> getProjects() {
+
+    TransactionDebug.transactionRequired("getProjects resource");
+
     List<Projects.ProjectDto> projects = Lists.newArrayList();
     for(Project project : projectService.getProjects()) {
       projects.add(Dtos.asDto(project, projectService.getProjectDirectoryPath(project)));

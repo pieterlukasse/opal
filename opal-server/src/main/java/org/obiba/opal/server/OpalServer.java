@@ -7,20 +7,14 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
-import uk.co.flamingpenguin.jewel.cli.CliFactory;
-
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class OpalServer {
 
   private static final Logger log = LoggerFactory.getLogger(OpalServer.class);
 
-  public interface OpalServerOptions {
-
-  }
-
   private GenericApplicationContext ctx;
 
-  OpalServer(OpalServerOptions options) {
+  OpalServer() {
     setProperties();
 
     configureSLF4JBridgeHandler();
@@ -79,7 +73,6 @@ public class OpalServer {
   final void boot() {
     if(ctx.isActive()) {
       System.out.println("Opal Server successfully started.");
-
     }
   }
 
@@ -102,7 +95,7 @@ public class OpalServer {
     try {
       checkSystemProperty("OPAL_HOME", "OPAL_DIST");
 
-      final OpalServer opal = new OpalServer(CliFactory.parseArguments(OpalServerOptions.class, args));
+      final OpalServer opal = new OpalServer();
       opal.boot();
       Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override

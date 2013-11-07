@@ -53,10 +53,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -93,9 +89,6 @@ public class OpalJettyServer implements Service {
 
   @Autowired
   private ApplicationContext applicationContext;
-
-  @Autowired
-  private PlatformTransactionManager transactionManager;
 
   @Autowired
   private OpalRuntime opalRuntime;
@@ -246,7 +239,6 @@ public class OpalJettyServer implements Service {
     // handler.addFilter(new FilterHolder(new X509CertificateAuthenticationFilter()), "/ws/*", FilterMapping.DEFAULT);
     // handler.addFilter(new FilterHolder(new CrossOriginFilter()), "/*", FilterMapping.DEFAULT);
     handler.addFilter(new FilterHolder(new RequestContextFilter()), "/*", FilterMapping.DEFAULT);
-    handler.addFilter(new FilterHolder(new TransactionFilter(transactionManager)), "/*", FilterMapping.DEFAULT);
 
     webApplicationContext = new XmlWebApplicationContext();
     webApplicationContext.setParent(applicationContext);
@@ -303,34 +295,6 @@ public class OpalJettyServer implements Service {
       }
 
       filterChain.doFilter(request, response);
-    }
-
-  }
-
-  public static class TransactionFilter extends OncePerRequestFilter {
-
-    private final PlatformTransactionManager txManager;
-
-    public TransactionFilter(PlatformTransactionManager txManager) {
-      this.txManager = txManager;
-    }
-
-    @Override
-    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
-        final FilterChain filterChain) throws ServletException, IOException {
-      new TransactionTemplate(txManager).execute(new TransactionCallbackWithoutResult() {
-        @Override
-        protected void doInTransactionWithoutResult(TransactionStatus status) {
-          try {
-            filterChain.doFilter(request, response);
-          } catch(IOException e) {
-            throw new RuntimeException(e);
-          } catch(ServletException e) {
-            throw new RuntimeException(e);
-          }
-        }
-      });
-
     }
 
   }

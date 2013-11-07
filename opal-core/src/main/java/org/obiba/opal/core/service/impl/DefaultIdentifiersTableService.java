@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.base.Predicate;
 
@@ -45,9 +44,6 @@ public class DefaultIdentifiersTableService implements IdentifiersTableService {
 
   @Autowired
   private DatabaseRegistry databaseRegistry;
-
-  @Autowired
-  private TransactionTemplate transactionTemplate;
 
   @NotNull
   @Value("${org.obiba.opal.keys.tableReference}")

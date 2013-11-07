@@ -20,6 +20,7 @@ import org.obiba.magma.Timestamps;
 import org.obiba.magma.Value;
 import org.obiba.magma.ValueTable;
 import org.obiba.magma.VariableEntity;
+import org.obiba.opal.core.service.impl.TransactionDebug;
 import org.obiba.opal.project.domain.Project;
 import org.obiba.opal.web.magma.DatasourceResource;
 import org.obiba.opal.web.model.Magma;
@@ -35,6 +36,8 @@ public class Dtos {
   private Dtos() {}
 
   public static ProjectDto asDto(Project project, @NotNull String directory) {
+
+    TransactionDebug.transactionRequired("project asDto");
     ProjectDto.Builder builder = ProjectDto.newBuilder() //
         .setName(project.getName()) //
         .setTitle(project.getTitle()) //

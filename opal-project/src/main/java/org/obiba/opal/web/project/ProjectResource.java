@@ -28,7 +28,9 @@ import org.obiba.opal.web.model.Projects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Component
 @Scope("request")
 @Path("/project/{name}")

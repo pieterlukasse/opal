@@ -27,14 +27,17 @@ import org.obiba.opal.core.runtime.OpalRuntime;
 import org.obiba.opal.core.service.NoSuchFunctionalUnitException;
 import org.obiba.opal.core.service.OrientDbService;
 import org.obiba.opal.core.service.database.DatabaseRegistry;
+import org.obiba.opal.core.service.impl.TransactionDebug;
 import org.obiba.opal.project.domain.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
+@Transactional
 public class ProjectsServiceImpl implements ProjectService {
 
   private static final String PROJECTS_DIR = "projects";
@@ -86,6 +89,8 @@ public class ProjectsServiceImpl implements ProjectService {
 
   @Override
   public Iterable<Project> getProjects() {
+    TransactionDebug.transactionRequired("getProjects service");
+
     return orientDbService.list(Project.class);
   }
 

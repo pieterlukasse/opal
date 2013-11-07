@@ -26,6 +26,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
@@ -73,6 +74,7 @@ public class DatabaseResource {
   }
 
   @POST
+  @Transactional
   @Path("/connections")
   public Response testConnection() {
     Database database = getDatabase();

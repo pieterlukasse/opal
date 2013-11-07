@@ -47,7 +47,6 @@ import org.obiba.opal.search.IndexManagerConfigurationService;
 import org.obiba.opal.search.Schedule;
 import org.obiba.opal.web.TimestampedResponses;
 import org.obiba.opal.web.magma.view.ViewDtos;
-import org.obiba.opal.web.model.Magma;
 import org.obiba.opal.web.model.Magma.ViewDto;
 import org.obiba.opal.web.model.Opal;
 import org.obiba.opal.web.model.Opal.AclAction;
@@ -58,12 +57,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @SuppressWarnings("OverlyCoupledClass")
+@Transactional
 @Component
 @Scope("request")
 @Path("/datasource/{name}")

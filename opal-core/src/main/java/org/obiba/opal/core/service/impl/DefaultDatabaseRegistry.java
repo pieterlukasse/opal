@@ -30,6 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
@@ -63,6 +68,9 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
 
   @Autowired
   private IdentifiersTableService identifiersTableService;
+
+  @Autowired
+  private TransactionTemplate transactionTemplate;
 
   private final LoadingCache<String, DataSource> dataSourceCache = CacheBuilder.newBuilder()
       .removalListener(new DataSourceRemovalListener()) //
@@ -181,10 +189,17 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
         true);
   }
 
+  @Transactional(propagation = Propagation.NEVER)
   @Override
   public void delete(@NotNull Database database) throws CannotDeleteDatabaseWithDataException {
     if(database.isUsedForIdentifiers()) {
-      if(identifiersTableService.hasEntities(new EntitiesPredicate.NonViewEntitiesPredicate())) {
+      boolean hasEntities = transactionTemplate.execute(new TransactionCallback<Boolean>() {
+        @Override
+        public Boolean doInTransaction(TransactionStatus status) {
+          return identifiersTableService.hasEntities(new EntitiesPredicate.NonViewEntitiesPredicate());
+        }
+      });
+      if(hasEntities) {
         throw new IllegalArgumentException("Cannot delete identifiers database with entities");
       }
       unregister(database.getName(), identifiersTableService.getDatasourceName());
