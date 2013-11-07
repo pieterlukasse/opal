@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
@@ -64,9 +63,6 @@ public class DefaultDatabaseRegistry implements DatabaseRegistry {
 
   @Autowired
   private IdentifiersTableService identifiersTableService;
-
-  @Autowired
-  private TransactionTemplate transactionTemplate;
 
   private final LoadingCache<String, DataSource> dataSourceCache = CacheBuilder.newBuilder()
       .removalListener(new DataSourceRemovalListener()) //
