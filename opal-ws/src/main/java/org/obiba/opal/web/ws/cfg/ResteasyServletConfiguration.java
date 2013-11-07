@@ -10,18 +10,16 @@
 package org.obiba.opal.web.ws.cfg;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.jboss.resteasy.core.Dispatcher;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
-import org.jboss.resteasy.spi.Registry;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap;
+import org.jboss.resteasy.plugins.spring.SpringContextLoaderListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 public class ResteasyServletConfiguration {
 
   public static final String WS_ROOT = "/ws";
@@ -29,25 +27,28 @@ public class ResteasyServletConfiguration {
   @Autowired
   private ServletContextHandler servletContextHandler;
 
-  @Autowired
-  private Dispatcher dispatcher;
-
-  @Autowired
-  private ResteasyProviderFactory factory;
-
-  @Autowired
-  private Registry registry;
+//  @Autowired
+//  private Dispatcher dispatcher;
+//
+//  @Autowired
+//  private ResteasyProviderFactory factory;
+//
+//  @Autowired
+//  private Registry registry;
 
   @PostConstruct
   public void configureResteasyServlet() {
-    ServletContext servletContext = servletContextHandler.getServletContext();
-    servletContext.setAttribute(ResteasyProviderFactory.class.getName(), factory);
-    servletContext.setAttribute(Dispatcher.class.getName(), dispatcher);
-    servletContext.setAttribute(Registry.class.getName(), registry);
+//    ServletContext servletContext = servletContextHandler.getServletContext();
+//    servletContext.setAttribute(ResteasyProviderFactory.class.getName(), factory);
+//    servletContext.setAttribute(Dispatcher.class.getName(), dispatcher);
+//    servletContext.setAttribute(Registry.class.getName(), registry);
 
-    ServletHolder sh = new ServletHolder(new HttpServletDispatcher());
-    sh.setInitParameter("resteasy.servlet.mapping.prefix", WS_ROOT);
-    servletContextHandler.addServlet(sh, WS_ROOT + "/*");
+    servletContextHandler.addEventListener(new ResteasyBootstrap());
+    servletContextHandler.addEventListener(new SpringContextLoaderListener());
+
+    ServletHolder servletHolder = new ServletHolder(new HttpServletDispatcher());
+    servletHolder.setInitParameter("resteasy.servlet.mapping.prefix", WS_ROOT);
+    servletContextHandler.addServlet(servletHolder, WS_ROOT + "/*");
   }
 
 }

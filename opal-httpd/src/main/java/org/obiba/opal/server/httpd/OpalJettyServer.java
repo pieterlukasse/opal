@@ -18,6 +18,7 @@ import java.net.URL;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,6 +71,8 @@ public class OpalJettyServer implements Service {
   private static final int MAX_IDLE_TIME = 30000;
 
   private static final int REQUEST_HEADER_SIZE = 8192;
+
+  private static final String APPLICATION_CONTEXT = "classpath:/META-INF/spring/opal-httpd/context.xml";
 
   @Nullable
   @Value("${org.obiba.opal.http.port}")
@@ -236,19 +239,21 @@ public class OpalJettyServer implements Service {
     handler.addFilter(new FilterHolder(new OpalVersionFilter()), "/*", FilterMapping.DEFAULT);
     handler.addFilter(new FilterHolder(new AuthenticationFilter(securityMgr, opalRuntime, subjectAclService)), "/ws/*",
         FilterMapping.DEFAULT);
-    // handler.addFilter(new FilterHolder(new X509CertificateAuthenticationFilter()), "/ws/*", FilterMapping.DEFAULT);
-    // handler.addFilter(new FilterHolder(new CrossOriginFilter()), "/*", FilterMapping.DEFAULT);
     handler.addFilter(new FilterHolder(new RequestContextFilter()), "/*", FilterMapping.DEFAULT);
 
-    webApplicationContext = new XmlWebApplicationContext();
-    webApplicationContext.setParent(applicationContext);
-    ((ConfigurableWebApplicationContext) webApplicationContext).setServletContext(handler.getServletContext());
-    ((AbstractRefreshableConfigApplicationContext) webApplicationContext)
-        .setConfigLocation("classpath:/META-INF/spring/opal-httpd/context.xml");
+    initApplicationContext(handler.getServletContext());
+
     handler.getServletContext()
         .setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext);
 
     return handler;
+  }
+
+  private void initApplicationContext(ServletContext context) {
+    webApplicationContext = new XmlWebApplicationContext();
+    webApplicationContext.setParent(applicationContext);
+    ((ConfigurableWebApplicationContext) webApplicationContext).setServletContext(context);
+    ((AbstractRefreshableConfigApplicationContext) webApplicationContext).setConfigLocation(APPLICATION_CONTEXT);
   }
 
   private Handler createDistFileHandler(String directory) {
